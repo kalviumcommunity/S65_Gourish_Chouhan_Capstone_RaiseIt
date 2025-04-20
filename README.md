@@ -118,9 +118,9 @@ Reserved for unexpected bugs, deployment issues, or additional feature developme
 
 ## Contributors
 
-**Gourish Chouhan** — Lead Developer and Architect
+**Gourish Chouhan** — Lead Developer and Architect  
 
-Contributions are welcome! Feel free to submit a PR or open an issue.
+Contributions are welcome! Feel free to submit a PR or open an issue.   
 
 ---
 
