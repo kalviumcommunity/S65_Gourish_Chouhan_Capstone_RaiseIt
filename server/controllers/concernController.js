@@ -23,4 +23,24 @@ const createConcern = async (req, res) => {
   }
 };
 
-module.exports = { getConcerns, createConcern };
+const updateConcern = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    const concern = await Concern.findById(id);
+    if (!concern) {
+      return res.status(404).json({ message: 'Concern not found' });
+    }
+
+    if (title) concern.title = title;
+    if (description) concern.description = description;
+
+    const updatedConcern = await concern.save();
+    res.status(200).json(updatedConcern);
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+module.exports = { getConcerns, createConcern, updateConcern };
