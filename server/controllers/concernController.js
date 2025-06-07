@@ -2,7 +2,7 @@ const Concern = require('../models/Concern');
 
 const getConcerns = async (req, res) => {
   try {
-    const concerns = await Concern.find({});
+    const concerns = await Concern.find({}).populate('user', 'name email');
     res.status(200).json(concerns);
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
@@ -11,11 +11,11 @@ const getConcerns = async (req, res) => {
 
 const createConcern = async (req, res) => {
   try {
-    const { title, description } = req.body;
-    if (!title || !description) {
-      return res.status(400).json({ message: 'Title and description required' });
+    const { title, description, user } = req.body;
+    if (!title || !description || !user) {
+      return res.status(400).json({ message: 'Title, description, and user required' });
     }
-    const concern = new Concern({ title, description });
+    const concern = new Concern({ title, description, user });
     const saved = await concern.save();
     res.status(201).json(saved);
   } catch (error) {
