@@ -128,6 +128,11 @@ Contributions are welcome! Feel free to submit a PR or open an issue.
 
 For collaborations, feedback, or questions, reach out via GitHub Issues or email at [gourishchouhan338@gmail.com].
 
+## Links
+
+*   **Frontend Repository:** [Raise It! Frontend](https://raiseit-phi.vercel.app)
+*   **Backend Repository:** [Raise It! Backend](https://raiseit.onrender.com)
+
 **Happy Collaborating with Raise It! 🚀**
 
 ---
