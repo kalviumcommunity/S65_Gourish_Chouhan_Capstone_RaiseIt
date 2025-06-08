@@ -6,15 +6,22 @@ export default function CreateConcernForm({ onCreated }) {
   const [description, setDescription] = useState("");
   const [user, setUser] = useState("");
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await createConcern({ title, description, user });
+      let imageUrl = "";
+      if (image) {
+        const uploadRes = await uploadImage(image);
+        imageUrl = uploadRes.url;
+      }
+      await createConcern({ title, description, user, image: imageUrl });
       setTitle("");
       setDescription("");
       setUser("");
+      setImage(null);
       onCreated();
     } catch (e) {
       alert(e.message);
@@ -45,6 +52,12 @@ export default function CreateConcernForm({ onCreated }) {
         value={user}
         onChange={(e) => setUser(e.target.value)}
         required
+      />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setImage(e.target.files[0])}
+        className="block"
       />
       <button
         type="submit"

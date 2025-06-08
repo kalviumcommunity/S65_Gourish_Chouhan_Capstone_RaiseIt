@@ -33,3 +33,15 @@ export async function deleteConcern(id) {
   if (!res.ok) throw new Error("Failed to delete concern");
   return res.json();
 }
+
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch("https://raiseit.onrender.com/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Image upload failed");
+  return res.json();
+}
