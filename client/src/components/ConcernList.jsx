@@ -69,6 +69,9 @@ export default function ConcernList({ refresh, onRefresh }) {
           <div key={c._id} className="p-4 border rounded shadow">
             <h2 className="font-bold">{c.title}</h2>
             <p>{c.description}</p>
+            {c.image && (
+              <img src={c.image} alt="Concern" className="w-full max-w-xs mb-2 rounded" />
+            )}
             {c.user && (
               <div className="text-sm text-gray-500">
                 By: {c.user.name} ({c.user.email})
