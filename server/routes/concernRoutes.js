@@ -4,6 +4,7 @@ const {
   getConcerns,
   createConcern,
   updateConcern,
+  deleteConcern,
 } = require('../controllers/concernController');
 
 router.route('/').get(getConcerns).post(createConcern);
