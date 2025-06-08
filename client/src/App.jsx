@@ -10,7 +10,7 @@ function App() {
       <h1 className="text-2xl font-bold mb-4">RaiseIt Concerns</h1>
       <CreateConcernForm onCreated={() => setRefresh((r) => r + 1)} />
       <div className="my-8" />
-      <ConcernList key={refresh} />
+      <ConcernList refresh={refresh} onRefresh={() => setRefresh((r) => r + 1)} />
     </div>
   );
 }

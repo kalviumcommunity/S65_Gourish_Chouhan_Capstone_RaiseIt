@@ -43,4 +43,17 @@ const updateConcern = async (req, res) => {
   }
 };
 
-module.exports = { getConcerns, createConcern, updateConcern };
+const deleteConcern = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const concern = await Concern.findByIdAndDelete(id);
+    if (!concern) {
+      return res.status(404).json({ message: 'Concern not found' });
+    }
+    res.status(200).json({ message: 'Concern deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+module.exports = { getConcerns, createConcern, updateConcern, deleteConcern };

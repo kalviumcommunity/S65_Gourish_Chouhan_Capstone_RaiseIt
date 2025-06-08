@@ -15,3 +15,21 @@ export async function createConcern(data) {
   if (!res.ok) throw new Error("Failed to create concern");
   return res.json();
 }
+
+export async function updateConcern(id, data) {
+  const res = await fetch(`${API_BASE}/concerns/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update concern");
+  return res.json();
+}
+
+export async function deleteConcern(id) {
+  const res = await fetch(`${API_BASE}/concerns/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete concern");
+  return res.json();
+}
