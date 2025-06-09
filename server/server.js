@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const concernRoutes = require('./routes/concernRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
+const passport = require('./config/passport');
 
 connectDB();
 
@@ -16,6 +17,7 @@ app.get('/', (req, res) => res.send('API is running...'));
 app.use('/api/concerns', concernRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
+app.use(passport.initialize());
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
