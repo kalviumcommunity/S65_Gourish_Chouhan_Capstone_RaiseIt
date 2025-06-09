@@ -102,6 +102,14 @@ export default function AuthPage({ onAuthSuccess }) {
             </button>
           </>
         )}
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded w-full mt-4"
+          onClick={() => {
+            window.location.href = "https://raiseit.onrender.com/api/auth/google";
+          }}
+        >
+          Sign in with Google
+        </button>
       </div>
     </div>
   );
