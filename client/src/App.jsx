@@ -4,6 +4,7 @@ import AuthPage from "./components/AuthPage";
 import ConcernList from "./components/ConcernList";
 import CreateConcernForm from "./components/CreateConcernForm";
 import GoogleSuccess from "./components/GoogleSuccess";
+import DonateForm from "./components/DonateForm"; 
 
 function MainApp({ user, setUser, refresh, setRefresh }) {
   return (
@@ -22,6 +23,7 @@ function MainApp({ user, setUser, refresh, setRefresh }) {
       <CreateConcernForm onCreated={() => setRefresh((r) => r + 1)} />
       <div className="my-8" />
       <ConcernList refresh={refresh} onRefresh={() => setRefresh((r) => r + 1)} />
+      <DonateForm />
     </div>
   );
 }

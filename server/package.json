@@ -21,6 +21,7 @@
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "razorpay": "^2.9.6"
   }
 }
