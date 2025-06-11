@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AuthPage from "./components/AuthPage";
+import AuthPage from "./pages/AuthPage";
 import ConcernList from "./components/ConcernList";
 import CreateConcernForm from "./components/CreateConcernForm";
-import GoogleSuccess from "./components/GoogleSuccess";
-import DonateForm from "./components/DonateForm"; 
+import GoogleSuccess from "./components/common/GoogleSuccess";
+import DonateForm from "./components/common/DonateForm"; 
 
 function MainApp({ user, setUser, refresh, setRefresh }) {
   return (
