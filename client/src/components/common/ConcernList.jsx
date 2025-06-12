@@ -1,4 +1,4 @@
-import { updateConcern, deleteConcern } from "../services/api";
+import { updateConcern, deleteConcern } from "../../services/api";
 import { useState } from "react";
 
 export default function ConcernList({ refresh, onRefresh }) {
