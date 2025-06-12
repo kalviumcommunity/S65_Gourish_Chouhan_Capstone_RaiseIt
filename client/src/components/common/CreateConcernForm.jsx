@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createConcern } from "../services/api";
+import { createConcern } from "../../services/api";
 
 export default function CreateConcernForm({ onCreated }) {
   const [title, setTitle] = useState("");
