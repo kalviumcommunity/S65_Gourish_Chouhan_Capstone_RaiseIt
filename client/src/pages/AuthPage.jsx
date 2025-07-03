@@ -1,104 +1,137 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-
-import { Button } from "../components/ui/button";
+// src/pages/AuthPage.jsx
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+  useEffect,
+  useRef,
+  useState,
+  Fragment,
+} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import * as THREE from 'three';
 
-// A simple SVG for the Google icon
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+
+/* ---------------- Google icon ---------------- */
+
 const GoogleIcon = (props) => (
   <svg
-    role="img"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <title>Google</title>
-    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.9-5.06 1.9-4.41 0-7.99-3.59-7.99-7.99s3.58-7.99 7.99-7.99c2.36 0 4.01.92 4.94 1.84l2.58-2.58C18.99 1.29 16.1.25 12.48.25c-6.63 0-12 5.37-12 12s5.37 12 12 12c6.92 0 11.52-4.88 11.52-11.72 0-.79-.07-1.54-.19-2.28z" />
+    <path
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04
+      2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      fill="#4285F4"
+    />
+    <path
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23
+      1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99
+      20.53 7.7 23 12 23z"
+      fill="#34A853"
+    />
+    <path
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43
+      8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      fill="#FBBC05"
+    />
+    <path
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09
+      14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6
+      3.3-4.53 6.16-4.53z"
+      fill="#EA4335"
+    />
   </svg>
 );
 
+/* ---------------- Component ---------------- */
+
 export default function AuthPage({ onAuthSuccess }) {
-  const [mode, setMode] = useState("login"); // 'login' or 'signup'
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  /* state */
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const vantaRef = useRef(null);
-  const [vantaEffect, setVantaEffect] = useState(null);
+  /* router */
   const navigate = useNavigate();
 
-  // Initialize Vanta.js background effect on mount
-  useEffect(() => {
-    if (!vantaEffect && window.VANTA) {
-      setVantaEffect(
-        window.VANTA.GLOBE({
-          el: vantaRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 1.0,
-          color: 0xd1d1d1,
-          color2:0xe3e3e3,
-          backgroundColor: 0xffffff,
-          size: 0.9,
-        })
-      );
-    }
-    // Destroy Vanta effect on unmount to prevent memory leaks
-    return () => {
-      if (vantaEffect) vantaEffect.destroy();
-    };
-  }, [vantaEffect]);
+  /* vanta */
+  const vantaRef = useRef(null);
 
-  const handleAuthSuccess = (userData) => {
-    if (onAuthSuccess) {
-      onAuthSuccess(userData);
-    }
-    navigate("/"); // Redirect to home page on success
+  useEffect(() => {
+    let effect;
+    import('vanta/dist/vanta.globe.min').then(({ default: GLOBE }) => {
+      effect = GLOBE({
+        el: vantaRef.current,
+        THREE,
+        mouseControls: true,
+        touchControls: true,
+        minHeight: 200,
+        minWidth: 200,
+        scale: 1,
+        scaleMobile: 1,
+        color: 0x616161,
+        color2: 0xb3a4a4,
+        backgroundColor: 0xf9f9f9,
+        size: 0.9,
+      });
+    });
+    return () => effect?.destroy();
+  }, []);
+
+  /* helpers */
+  const update = (key) => (e) =>
+    setForm((p) => ({ ...p, [key]: e.target.value }));
+
+  const handleSuccess = (user) => {
+    onAuthSuccess?.(user);
+    navigate('/');
   };
 
+  /* submit */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-
+    setLoading(true);
     try {
-      const endpoint =
-        mode === "signup"
-          ? "https://raiseit.onrender.com/api/auth/register"
-          : "https://raiseit.onrender.com/api/auth/login";
-      const body =
-        mode === "signup" ? { name, email, password } : { email, password };
+      const url =
+        mode === 'signup'
+          ? 'https://raiseit.onrender.com/api/auth/register'
+          : 'https://raiseit.onrender.com/api/auth/login';
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const body =
+        mode === 'signup'
+          ? {
+              name: form.name,
+              email: form.email,
+              password: form.password,
+            }
+          : {
+              email: form.email,
+              password: form.password,
+            };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Authentication failed.");
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      handleAuthSuccess(data.user);
+      if (!res.ok) throw new Error(data.message ?? 'Authentication failed.');
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      handleSuccess(data.user);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -106,153 +139,193 @@ export default function AuthPage({ onAuthSuccess }) {
     }
   };
 
-  const handleGoogleAuth = () => {
+  /* google */
+  const handleGoogle = () => {
     setGoogleLoading(true);
-    window.location.href = "https://raiseit.onrender.com/api/auth/google";
+    window.location.href = 'https://raiseit.onrender.com/api/auth/google';
   };
 
-  const toggleMode = () => {
-    setMode(mode === "login" ? "signup" : "login");
-    setError(null);
-  };
-
+  /* render */
   return (
-    <div
-      ref={vantaRef}
-      className="flex min-h-screen w-full items-center justify-center p-4"
-    >
-      {/* IMPROVEMENT: This is now a contained, rounded glass container */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 shadow-2xl"
-      >
-        {/* IMPROVEMENT: The blur is now contained within this container */}
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-[300px]"></div>
+    <Fragment>
+      {/* Vanta background */}
+      <div ref={vantaRef} className="fixed inset-0 z-0" />
 
-        <div className="relative z-10">
-          <Card className="border-none bg-transparent shadow-none">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold text-black">
-                {mode === "login" ? "Welcome Back!" : "Create an Account"}
-              </CardTitle>
-              <CardDescription>
-                {mode === "login"
-                  ? "Enter your credentials to access your account."
-                  : "Enter your information to get started."}
-              </CardDescription>
-            </CardHeader>
+      {/* page content */}
+      <main className="relative z-10 flex min-h-screen flex-col md:flex-row">
+        {/* left half with blur/glass */}
+        <section
+          className="flex w-full flex-col justify-center px-6 py-12
+                     bg-white/10 backdrop-blur-sm md:w-1/2"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto w-full max-w-md"
+          >
+            <header className="mb-10 text-center">
+              <h1 className="mb-4 text-3xl font-bold text-gray-900">
+                {mode === 'login'
+                  ? 'Welcome Back!'
+                  : 'Create an Account'}
+              </h1>
+              <p className="text-lg text-gray-700">
+                {mode === 'login'
+                  ? 'Enter your credentials to access your account.'
+                  : 'Enter your information to get started.'}
+              </p>
+            </header>
 
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-4">
-                {/* IMPROVEMENT: Smoothly animates the name field in and out */}
-                <AnimatePresence mode="wait">
-                  {mode === "signup" && (
-                    <motion.div
-                      key="name-field"
-                      layout
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-2"
-                    >
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        placeholder="John Doe"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        disabled={loading}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                {error && (
-                  <p className="text-center text-sm text-red-500">{error}</p>
-                )}
-              </CardContent>
-
-              <CardFooter className="flex flex-col gap-4">
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {loading
-                    ? "Please wait..."
-                    : mode === "login"
-                    ? "Log In"
-                    : "Create Account"}
-                </Button>
-
-                <div className="relative w-full">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGoogleAuth}
-                  disabled={googleLoading}
-                >
-                  {googleLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <GoogleIcon className="mr-2 h-4 w-4" />
-                  )}
-                  Google
-                </Button>
-
-                <div className="mt-2 text-center text-sm">
-                  {mode === "login"
-                    ? "Don't have an account?"
-                    : "Already have an account?"}
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="pl-1"
-                    onClick={toggleMode}
+            {/* form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <AnimatePresence mode="wait">
+                {mode === 'signup' && (
+                  <motion.div
+                    key="name"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-2"
                   >
-                    {mode === "login" ? "Sign up" : "Log in"}
-                  </Button>
+                    <Label
+                      htmlFor="name"
+                      className="text-base font-medium text-gray-800"
+                    >
+                      Name
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="John Doe"
+                      value={form.name}
+                      onChange={update('name')}
+                      required
+                      disabled={loading}
+                      className="h-12 bg-white/20"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-base font-medium text-gray-800"
+                >
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={form.email}
+                  onChange={update('email')}
+                  required
+                  disabled={loading}
+                  className="h-12 bg-white/20"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-base font-medium text-gray-800"
+                >
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={update('password')}
+                  required
+                  disabled={loading}
+                  className="h-12 bg-white/20"
+                />
+              </div>
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-md bg-red-50 p-2 text-center
+                    text-sm text-red-600"
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="h-12 w-full bg-gray-900 text-base
+                  font-medium text-white hover:bg-gray-800"
+              >
+                {loading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {loading
+                  ? 'Please wait...'
+                  : mode === 'login'
+                  ? 'Log In'
+                  : 'Create Account'}
+              </Button>
+
+              {/* divider */}
+              <div className="relative w-full">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-300/60" />
                 </div>
-              </CardFooter>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-4 font-medium text-gray-600">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              {/* google */}
+              <Button
+                variant="outline"
+                disabled={googleLoading}
+                onClick={handleGoogle}
+                className="h-12 w-full bg-white font-medium hover:bg-gray-100"
+              >
+                {googleLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <GoogleIcon className="mr-2" />
+                )}
+                Continue with Google
+              </Button>
+
+              {/* switch mode */}
+              <p className="mt-8 text-center text-base text-gray-700">
+                {mode === 'login'
+                  ? "Don't have an account?"
+                  : 'Already have an account?'}
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() =>
+                    setMode((m) =>
+                      m === 'login' ? 'signup' : 'login',
+                    )
+                  }
+                  className="pl-1 font-medium text-gray-900
+                    hover:text-gray-700"
+                >
+                  {mode === 'login' ? 'Sign up' : 'Log in'}
+                </Button>
+              </p>
             </form>
-          </Card>
-        </div>
-      </motion.div>
-    </div>
+          </motion.div>
+        </section>
+
+        {/* right half (raw globe, no blur) */}
+        <div className="hidden md:block md:w-1/2" />
+      </main>
+    </Fragment>
   );
 }

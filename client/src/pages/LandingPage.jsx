@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import hero from "../assets/hero.png";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -168,7 +169,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5 }}
             >
               <img
-                src="/placeholder.svg"
+                src={hero}
                 alt="Hero"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center shadow-lg sm:w-full lg:order-last"
                 style={{ maxHeight: 400, maxWidth: 600 }}
