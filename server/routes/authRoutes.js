@@ -17,7 +17,7 @@ router.get(
     // Redirect to frontend with JWT and user info as query params
     const { token, user } = req.user;
     res.redirect(
-      `https://your-frontend-domain.com/auth/google/success?token=${token}&name=${encodeURIComponent(
+      `https://localhost:3000/auth/google/success?token=${token}&name=${encodeURIComponent(
         user.name
       )}&email=${encodeURIComponent(user.email)}`
     );

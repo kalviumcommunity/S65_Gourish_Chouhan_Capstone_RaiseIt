@@ -32,10 +32,10 @@ export default function Navbar() {
               Concerns
             </Link>
             <Link 
-              to="/trending" 
+              to="/community" 
               className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
             >
-              Trending
+              Community
             </Link>
             <Link 
               to="/donate" 
@@ -93,11 +93,11 @@ export default function Navbar() {
                 Concerns
               </Link>
               <Link 
-                to="/trending" 
+                to="/community" 
                 className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Trending
+                Community
               </Link>
               <Link 
                 to="/donate" 
