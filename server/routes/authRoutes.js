@@ -16,10 +16,11 @@ router.get(
   (req, res) => {
     // Redirect to frontend with JWT and user info as query params
     const { token, user } = req.user;
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
     res.redirect(
-      `https://localhost:3000/auth/google/success?token=${token}&name=${encodeURIComponent(
+      `${clientUrl}/auth/google/success?token=${token}&name=${encodeURIComponent(
         user.name
-      )}&email=${encodeURIComponent(user.email)}`
+      )}&email=${encodeURIComponent(user.email)}&id=${encodeURIComponent(user._id)}`
     );
   }
 );

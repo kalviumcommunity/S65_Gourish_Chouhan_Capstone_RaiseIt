@@ -21,6 +21,7 @@ import {
 } from "../components/ui/card";
 import { Skeleton } from "../components/ui/skeleton";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
+import { getConcerns } from "../services/api";
 
 // Animation variants
 const containerVariants = {
@@ -109,13 +110,7 @@ export default function LandingPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          "https://raiseit.onrender.com/api/concerns?sort=trending&limit=4"
-        );
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await res.json();
+        const data = await getConcerns({ sort: "trending", limit: 4 });
         setTrending(data);
       } catch (err) {
         setError(err.message);

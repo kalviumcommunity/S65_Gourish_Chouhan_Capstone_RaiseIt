@@ -1,268 +1,218 @@
-import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Upload,
-  Edit,
-  Flag,
-  GraduationCap,
-  Briefcase,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Separator } from "../components/ui/separator";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { getMe, getUser, updateMe, uploadImage } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+const emptyEducation = { degree: "", institution: "", year: "" };
+const emptyWork = { position: "", company: "", year: "" };
 
 export default function EditProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user: authUser, updateUser } = useAuth();
+  const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Mock user data
-  const user = {
-    id: id,
-    username: "johndoe",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "/placeholder.svg?height=200&width=200",
-    coverImage: "/placeholder.svg?height=400&width=1200",
-    bio: "Passionate community advocate with a focus on urban development and environmental sustainability. I believe in the power of collective action to create meaningful change.",
-    address: "123 Main Street, Anytown, CA 94123",
-    phone: "(555) 123-4567",
-    education: [
-      { id: "1", degree: "Master of Urban Planning", institution: "State University", year: "2018-2020" },
-      { id: "2", degree: "Bachelor of Environmental Science", institution: "City College", year: "2014-2018" },
-    ],
-    workExperience: [
-      { id: "1", position: "Urban Planner", company: "City Development Office", year: "2020-Present" },
-      { id: "2", position: "Environmental Consultant", company: "Green Solutions Inc.", year: "2018-2020" },
-    ],
+  const authUserId = authUser?.id || authUser?._id;
+  const isOwnProfile = id === "me" || id === "undefined" || authUserId === id;
+
+  useEffect(() => {
+    if (!isOwnProfile) {
+      navigate(`/profile/${id}`);
+      return;
+    }
+
+    const profileRequest = id === "me" || id === "undefined" ? getMe() : getUser(id);
+
+    profileRequest
+      .then((profile) => {
+        setForm({
+          name: profile.name || "",
+          username: profile.username || "",
+          email: profile.email || "",
+          avatar: profile.avatar || "",
+          coverImage: profile.coverImage || "",
+          bio: profile.bio || "",
+          address: profile.address || "",
+          phone: profile.phone || "",
+          education: profile.education?.length ? profile.education : [{ ...emptyEducation }],
+          workExperience: profile.workExperience?.length ? profile.workExperience : [{ ...emptyWork }],
+        });
+      })
+      .catch((error) => alert(error.message))
+      .finally(() => setLoading(false));
+  }, [id, isOwnProfile, navigate]);
+
+  const updateField = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  const updateArrayField = (listKey, index, key) => (event) => {
+    setForm((current) => ({
+      ...current,
+      [listKey]: current[listKey].map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: event.target.value } : item
+      ),
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate(`/profile/${user.id}`);
-    }, 1500);
+  const addArrayItem = (listKey, emptyValue) => {
+    setForm((current) => ({ ...current, [listKey]: [...current[listKey], { ...emptyValue }] }));
   };
+
+  const removeArrayItem = (listKey, index, emptyValue) => {
+    setForm((current) => {
+      const next = current[listKey].filter((_, itemIndex) => itemIndex !== index);
+      return { ...current, [listKey]: next.length ? next : [{ ...emptyValue }] };
+    });
+  };
+
+  const handleImageUpload = async (key, file) => {
+    if (!file) return;
+    try {
+      const result = await uploadImage(file);
+      setForm((current) => ({ ...current, [key]: result.url }));
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      const updated = await updateMe(form);
+      updateUser({ ...(authUser || {}), ...updated, id: updated._id || updated.id });
+      navigate(`/profile/${updated._id || updated.id}`);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading || !form) return <div className="py-16 text-center text-muted-foreground">Loading profile...</div>;
 
   return (
-    <div>
-      <main className="flex-1 container py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 mb-6">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to={`/profile/${user.id}`}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> Back to Profile
-              </Link>
-            </Button>
-          </div>
+    <main className="container py-8">
+      <div className="mx-auto max-w-4xl">
+        <Button variant="ghost" size="sm" asChild className="mb-6">
+          <Link to={`/profile/${id}`}><ArrowLeft className="mr-1 h-4 w-4" /> Back to Profile</Link>
+        </Button>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Edit Profile</CardTitle>
-              <CardDescription>
-                Update your personal information and profile settings
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <Tabs defaultValue="personal" className="w-full">
-                <CardContent className="pt-6">
-                  <TabsList className="grid w-full grid-cols-3 mb-8">
-                    <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                    <TabsTrigger value="education">Education</TabsTrigger>
-                    <TabsTrigger value="work">Work Experience</TabsTrigger>
-                  </TabsList>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Edit Profile</CardTitle>
+            <CardDescription>Update your public RaiseIt profile.</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <Tabs defaultValue="personal">
+              <CardContent className="pt-6">
+                <TabsList className="mb-8 grid w-full grid-cols-3">
+                  <TabsTrigger value="personal">Personal</TabsTrigger>
+                  <TabsTrigger value="education">Education</TabsTrigger>
+                  <TabsTrigger value="work">Work</TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="personal" className="space-y-6">
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <Label>Profile Picture</Label>
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-20 w-20">
-                            <AvatarImage src={user.avatar} alt={user.name} />
-                            <AvatarFallback className="text-2xl">
-                              {user.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <Input id="avatar" type="file" className="mb-2" />
-                            <div className="text-xs text-muted-foreground">
-                              Recommended: Square image, at least 400x400px
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Cover Image</Label>
-                        <div className="h-32 w-full rounded-md border border-dashed flex items-center justify-center relative overflow-hidden">
-                          <img
-                            src={user.coverImage || "/placeholder.svg"}
-                            alt="Cover"
-                            className="w-full h-full object-cover absolute inset-0"
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <Button variant="outline" className="bg-white gap-1">
-                              <Upload className="h-4 w-4" /> Change Cover
-                            </Button>
-                          </div>
-                        </div>
-                        <Input id="cover" type="file" className="mt-2" />
-                        <div className="text-xs text-muted-foreground">
-                          Recommended: 1200x400px image
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
-                          <Input id="name" defaultValue={user.name} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="username">Username</Label>
-                          <Input id="username" defaultValue={user.username} />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={user.email} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="bio">Bio</Label>
-                        <Textarea id="bio" defaultValue={user.bio} className="min-h-[100px]" />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="address">Address</Label>
-                          <Input id="address" defaultValue={user.address} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone</Label>
-                          <Input id="phone" defaultValue={user.phone} />
-                        </div>
-                      </div>
+                <TabsContent value="personal" className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Profile Picture</Label>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src={form.avatar} alt={form.name} />
+                        <AvatarFallback>{form.name?.[0] || "U"}</AvatarFallback>
+                      </Avatar>
+                      <Input type="file" accept="image/*" onChange={(event) => handleImageUpload("avatar", event.target.files?.[0])} />
                     </div>
-                  </TabsContent>
+                  </div>
 
-                  <TabsContent value="education" className="space-y-6">
-                    <div className="space-y-6">
-                      {user.education.map((edu, index) => (
-                        <div key={edu.id} className="space-y-4">
-                          {index > 0 && <Separator />}
-                          <div className="pt-4">
-                            <div className="grid gap-4 md:grid-cols-2">
-                              <div className="space-y-2">
-                                <Label htmlFor={`degree-${edu.id}`}>Degree/Certificate</Label>
-                                <Input id={`degree-${edu.id}`} defaultValue={edu.degree} />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor={`institution-${edu.id}`}>Institution</Label>
-                                <Input id={`institution-${edu.id}`} defaultValue={edu.institution} />
-                              </div>
-                            </div>
-                            <div className="mt-4 space-y-2">
-                              <Label htmlFor={`year-${edu.id}`}>Year</Label>
-                              <Input id={`year-${edu.id}`} defaultValue={edu.year} />
-                            </div>
-                            <div className="mt-4 flex justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                type="button"
-                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      <Button type="button" variant="outline" className="w-full">
-                        Add Education
-                      </Button>
+                  <div className="space-y-2">
+                    <Label>Cover Image</Label>
+                    <div className="h-36 overflow-hidden rounded-xl border bg-gray-100">
+                      {form.coverImage && <img src={form.coverImage} alt="Cover" className="h-full w-full object-cover" />}
                     </div>
-                  </TabsContent>
+                    <Input type="file" accept="image/*" onChange={(event) => handleImageUpload("coverImage", event.target.files?.[0])} />
+                  </div>
 
-                  <TabsContent value="work" className="space-y-6">
-                    <div className="space-y-6">
-                      {user.workExperience.map((work, index) => (
-                        <div key={work.id} className="space-y-4">
-                          {index > 0 && <Separator />}
-                          <div className="pt-4">
-                            <div className="grid gap-4 md:grid-cols-2">
-                              <div className="space-y-2">
-                                <Label htmlFor={`position-${work.id}`}>Position</Label>
-                                <Input id={`position-${work.id}`} defaultValue={work.position} />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor={`company-${work.id}`}>Company</Label>
-                                <Input id={`company-${work.id}`} defaultValue={work.company} />
-                              </div>
-                            </div>
-                            <div className="mt-4 space-y-2">
-                              <Label htmlFor={`work-year-${work.id}`}>Year</Label>
-                              <Input id={`work-year-${work.id}`} defaultValue={work.year} />
-                            </div>
-                            <div className="mt-4 flex justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                type="button"
-                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Full Name" value={form.name} onChange={updateField("name")} required />
+                    <Field label="Username" value={form.username} onChange={updateField("username")} />
+                  </div>
+                  <Field label="Email" value={form.email} disabled />
+                  <div className="space-y-2">
+                    <Label>Bio</Label>
+                    <Textarea value={form.bio} onChange={updateField("bio")} className="min-h-28" />
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Address" value={form.address} onChange={updateField("address")} />
+                    <Field label="Phone" value={form.phone} onChange={updateField("phone")} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="education" className="space-y-4">
+                  {form.education.map((item, index) => (
+                    <Card key={index}>
+                      <CardContent className="space-y-4 pt-6">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Field label="Degree" value={item.degree} onChange={updateArrayField("education", index, "degree")} />
+                          <Field label="Institution" value={item.institution} onChange={updateArrayField("education", index, "institution")} />
                         </div>
-                      ))}
-
-                      <Button type="button" variant="outline" className="w-full">
-                        Add Work Experience
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" type="button" asChild>
-                    <Link to={`/profile/${user.id}`}>Cancel</Link>
+                        <Field label="Year" value={item.year} onChange={updateArrayField("education", index, "year")} />
+                        <Button type="button" variant="outline" size="sm" onClick={() => removeArrayItem("education", index, emptyEducation)}>
+                          <Trash2 className="mr-1 h-4 w-4" /> Remove
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Button type="button" variant="outline" onClick={() => addArrayItem("education", emptyEducation)}>
+                    <Plus className="mr-1 h-4 w-4" /> Add Education
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Saving Changes..." : "Save Changes"}
+                </TabsContent>
+
+                <TabsContent value="work" className="space-y-4">
+                  {form.workExperience.map((item, index) => (
+                    <Card key={index}>
+                      <CardContent className="space-y-4 pt-6">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <Field label="Position" value={item.position} onChange={updateArrayField("workExperience", index, "position")} />
+                          <Field label="Company" value={item.company} onChange={updateArrayField("workExperience", index, "company")} />
+                        </div>
+                        <Field label="Year" value={item.year} onChange={updateArrayField("workExperience", index, "year")} />
+                        <Button type="button" variant="outline" size="sm" onClick={() => removeArrayItem("workExperience", index, emptyWork)}>
+                          <Trash2 className="mr-1 h-4 w-4" /> Remove
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Button type="button" variant="outline" onClick={() => addArrayItem("workExperience", emptyWork)}>
+                    <Plus className="mr-1 h-4 w-4" /> Add Work
                   </Button>
-                </CardFooter>
-              </Tabs>
-            </form>
-          </Card>
-        </div>
-      </main>
+                </TabsContent>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" type="button" asChild><Link to={`/profile/${id}`}>Cancel</Link></Button>
+                <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
+              </CardFooter>
+            </Tabs>
+          </form>
+        </Card>
+      </div>
+    </main>
+  );
+}
+
+function Field({ label, ...props }) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Input {...props} />
     </div>
   );
 }

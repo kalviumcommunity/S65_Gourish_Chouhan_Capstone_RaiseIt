@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home, SearchX, Rocket } from "lucide-react";
+import { ArrowLeft, Home, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 export default function NotFoundPage() {
   return (
@@ -74,10 +75,10 @@ export default function NotFoundPage() {
             className="group bg-primary hover:bg-primary/90"
             aria-label="Go back to the homepage"
           >
-            <a href="/">
+            <Link to="/">
               <Home className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
               Return Home
-            </a>
+            </Link>
           </Button>
         </motion.div>
 

@@ -1,5 +1,5 @@
-import { updateConcern, deleteConcern } from "../../services/api";
-import { useState } from "react";
+import { deleteConcern, getConcerns, updateConcern } from "../../services/api";
+import { useEffect, useState } from "react";
 
 export default function ConcernList({ refresh, onRefresh }) {
   const [concerns, setConcerns] = useState([]);

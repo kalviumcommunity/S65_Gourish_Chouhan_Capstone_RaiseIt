@@ -1,5 +1,6 @@
-import { Flag, Github, Twitter, Linkedin, Mail, Clock, Heart } from "lucide-react";
+import { CircleDot, Github, Twitter, Linkedin, Mail, Clock, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const socialLinks = [
   { href: "#", icon: Github, label: "GitHub" },
@@ -9,22 +10,17 @@ const socialLinks = [
 
 const quickLinks = [
   { href: "/concerns", label: "Browse Concerns" },
-  { href: "/trending", label: "Trending Issues" },
   { href: "/donate", label: "Donate" },
-  { href: "/about", label: "About Us" },
+  { href: "/community", label: "Community" },
 ];
 
 const resources = [
-  { href: "/help", label: "Help Center" },
-  { href: "/guidelines", label: "Community Guidelines" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/blog", label: "Blog" },
+  { href: "/concerns/new", label: "Raise a Concern" },
+  { href: "/auth", label: "Create Account" },
 ];
 
 const legalLinks = [
-  { href: "/terms", label: "Terms of Service" },
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/cookies", label: "Cookie Policy" },
+  { href: "/", label: "Home" },
 ];
 
 export default function Footer() {
@@ -40,24 +36,28 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-16 grid gap-12 md:grid-cols-4">
         {/* Brand */}
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Flag className="h-6 w-6 text-black" />
-            <span className="text-2xl font-bold text-black">RaiseIt</span>
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center text-black">
+              <CircleDot className="h-6 w-6" strokeWidth={2.1} />
+            </span>
+            <span className="text-2xl font-semibold leading-none text-black">RaiseIt</span>
           </div>
           <p className="text-gray-600 max-w-sm">
             Empowering communities to raise their voices and drive meaningful change through collective action and digital advocacy.
           </p>
           <div className="flex gap-3">
-            {socialLinks.map(({ href, icon: Icon, label }) => (
+            {socialLinks.map((item) => {
+              const SocialIcon = item.icon;
+              return (
               <a
-                key={label}
-                href={href}
+                key={item.label}
+                href={item.href}
                 className="p-2.5 bg-white rounded-full border border-gray-100 text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:shadow transition"
-                aria-label={label}
+                aria-label={item.label}
               >
-                <Icon className="h-4 w-4" />
+                <SocialIcon className="h-4 w-4" />
               </a>
-            ))}
+            )})}
           </div>
         </div>
 
@@ -113,13 +113,14 @@ export default function Footer() {
           </p>
           <div className="flex gap-6">
             {legalLinks.map(({ href, label }) => (
-              <a
+            <Link
                 key={label}
                 href={href}
+                to={href}
                 className="text-sm text-gray-500 hover:text-blue-600 transition"
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -135,13 +136,14 @@ function FooterSection({ title, links }) {
       <ul className="space-y-3">
         {links.map(({ href, label }) => (
           <li key={href}>
-            <a
-              href={href}
-              className="flex items-center text-gray-600 hover:text-blue-600 transition"
-            >
-              <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-3 group-hover:bg-blue-500 transition" />
-              {label}
-            </a>
+            <Link
+                href={href}
+                to={href}
+                className="flex items-center text-gray-600 hover:text-blue-600 transition"
+              >
+                <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-3 group-hover:bg-blue-500 transition" />
+                {label}
+            </Link>
           </li>
         ))}
       </ul>

@@ -13,6 +13,8 @@ import * as THREE from 'three';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { getGoogleAuthUrl, loginUser, registerUser } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 /* ---------------- Google icon ---------------- */
 
@@ -62,6 +64,7 @@ export default function AuthPage({ onAuthSuccess }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { login } = useAuth();
 
   /* router */
   const navigate = useNavigate();
@@ -105,11 +108,6 @@ export default function AuthPage({ onAuthSuccess }) {
     setError(null);
     setLoading(true);
     try {
-      const url =
-        mode === 'signup'
-          ? 'https://raiseit.onrender.com/api/auth/register'
-          : 'https://raiseit.onrender.com/api/auth/login';
-
       const body =
         mode === 'signup'
           ? {
@@ -122,15 +120,8 @@ export default function AuthPage({ onAuthSuccess }) {
               password: form.password,
             };
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? 'Authentication failed.');
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      const data = mode === 'signup' ? await registerUser(body) : await loginUser(body);
+      login(data);
       handleSuccess(data.user);
     } catch (err) {
       setError(err.message);
@@ -142,7 +133,7 @@ export default function AuthPage({ onAuthSuccess }) {
   /* google */
   const handleGoogle = () => {
     setGoogleLoading(true);
-    window.location.href = 'https://raiseit.onrender.com/api/auth/google';
+    window.location.href = getGoogleAuthUrl();
   };
 
   /* render */

@@ -1,139 +1,291 @@
+# RaiseIt
 
----
+RaiseIt is a full-stack community platform for raising public concerns, organizing community groups, discussing solutions, collecting donations for admin-managed causes, and moderating user-generated content.
 
-# Raise It
-
-**Raise It** is a dynamic web platform where users can voice concerns, seek advice, and engage in meaningful group discussions on a wide range of issues. Going beyond basic problem-solving, Raise It fosters diverse perspectives, collaborative brainstorming, and real-time feedback to collectively address both personal and public challenges. It empowers communities to share insights, highlight issues, and build solutions together.
-
----
+The app includes email/password auth, Google OAuth, Cloudinary image uploads, Razorpay donations, Gemini-powered help chat with fallback responses, user profiles, group discussions, and an admin dashboard for moderation and donation cause management.
 
 ## Features
 
-- **Community Discussions**: Initiate and participate in open conversations about personal or societal topics.
-- **Public Issue Highlighting**: Bring attention to community concerns through a public forum.
-- **File Upload Functionality**: Share relevant documents or images to enrich discussions.
-- **JWT and Third-Party Authentication**: Secure user authentication via email/password and Google OAuth.
-- **User Interaction**: Comment, react, and collaborate within discussions.
-- **Real-Time Feedback Tools**: Collaborate efficiently with instant feedback mechanisms.
-
----
+- User registration, login, JWT sessions, and Google OAuth
+- Role-based admin access using an `ADMIN_EMAILS` allowlist
+- Public concerns with search, tags, status filters, comments, upvotes, reports, edit, and delete
+- Community groups with join/leave, discussions, replies, and reporting
+- User profiles with avatar, cover image, bio, contact, education, work experience, concerns, groups, and donation history
+- Cloudinary-backed image uploads
+- Razorpay donation checkout with payment verification and persisted donation records
+- DB-backed donation causes managed from the admin dashboard
+- Admin moderation for reported concerns, groups, and discussions
+- Gemini chatbot with resilient fallback answers when the external API is unavailable
+- Production hardening with Helmet, CORS origin allowlisting, API rate limits, upload limits, and production env validation
 
 ## Tech Stack
 
-**Frontend**:
-- React.js
-- TailwindCSS for sleek and responsive UI
-- Axios for API communication
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 19, Vite, Tailwind CSS, React Router, Radix UI, Lucide React |
+| Backend | Node.js, Express 5, MongoDB, Mongoose |
+| Auth | JWT, bcrypt, Passport Google OAuth |
+| Uploads | Cloudinary, Multer memory storage |
+| Payments | Razorpay |
+| AI Helper | Google Gemini API with app fallback responses |
+| Security | Helmet, CORS, express-rate-limit, env validation |
+| Testing | Node test runner, Supertest |
 
-**Backend**:
-- Node.js with Express.js
-- MongoDB with Mongoose for database management
-- JWT Authentication for secure sessions
+## Repository Structure
 
-**Authentication**:
-- Manual authentication (username/password)
-- Google OAuth integration for third-party login
+```text
+RaiseIt/
+  client/                 React frontend
+    src/
+      components/         Shared UI and layout components
+      context/            Auth context
+      pages/              Route pages
+      services/           API client functions
+      config.js           Frontend runtime config
+  server/                 Express backend
+    config/               DB, Cloudinary, Passport, Razorpay, env validation
+    controllers/          Route handlers
+    middlewares/          Auth, optional auth, rate limiters
+    models/               Mongoose models
+    routes/               API routes
+    test/                 Backend tests
+```
 
-**Other**:
-- GitHub Projects and Issues for project management
+## Prerequisites
 
----
+- Node.js 20 or newer recommended
+- npm
+- MongoDB local instance or MongoDB Atlas cluster
+- Cloudinary account for image uploads
+- Razorpay account for payment checkout
+- Google OAuth credentials if Google login is enabled
+- Gemini API key if AI responses are enabled
 
-## How It Works
+## Environment Variables
 
-1. **User Registration & Authentication**
-   - Users can sign up manually or log in using Google OAuth.
-   - Secure sessions are maintained with JWT tokens.
+Copy the example files before running the app:
 
-2. **Discussion Participation**
-   - Users can start a discussion or join existing threads.
-   - File uploads enhance conversation quality.
-   - Public issues can be highlighted for broader community engagement.
+```bash
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
 
-3. **Real-Time Feedback and Interaction**
-   - Users can comment, suggest edits, or provide solutions instantly.
+On Windows PowerShell, copy the files manually or run:
 
-4. **Mood Board Creation (Future Enhancement)**
-   - Brands can create mood boards for inspiration and collaboration.
+```powershell
+Copy-Item server/.env.example server/.env
+Copy-Item client/.env.example client/.env
+```
 
-5. **Pitch Submissions**
-   - Designers can submit pitches or solutions for problems raised.
+### Server `.env`
 
----
+```env
+PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:3000
+MONGO_URI=mongodb://127.0.0.1:27017/RaiseIt
+JWT_SECRET=replace_with_a_long_random_secret
+ADMIN_EMAILS=admin@example.com
 
-## Capstone Journey Plan (Day-by-Day)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 
-### Week 1: Project Setup & Planning (5 Days)
-- **Day 1**: Finalize project idea and name
-- **Day 2**: Create low-fidelity wireframes
-- **Day 3**: Create high-fidelity UI mockups
-- **Day 4**: Set up GitHub repository (README, issues, project board)
-- **Day 5**: Plan database schema and relationships
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 
-### Week 2: Backend Development (7 Days)
-- **Day 6-7**: Set up backend server and structure
-- **Day 8-9**: Implement database schema & test CRUD operations
-- **Day 10**: Create API routes (GET, POST, PUT, DELETE)
-- **Day 11**: Add manual authentication (username/password)
-- **Day 12**: Implement and test JWT authentication
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-### Week 3: Frontend Development (7 Days)
-- **Day 13**: Initialize React app and folder structure
-- **Day 14-15**: Build core components (Home, Profile, Discussion Listings)
-- **Day 16**: Implement file upload functionality
-- **Day 17**: Connect frontend to backend (API integration)
-- **Day 18-19**: Style components as per high-fidelity designs
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.0-flash
+```
 
-### Week 4: Feature Enhancements (7 Days)
-- **Day 20**: Add 'Update' and 'Delete' features
-- **Day 21**: Integrate Google login (OAuth)
-- **Day 22-23**: Add mood board creation feature
-- **Day 24-25**: Implement pitch submission for designers
-- **Day 26**: Test complete user flows
+Production notes:
 
-### Week 5: Testing & Deployment (7 Days)
-- **Day 27-28**: Write unit tests with Jest
-- **Day 29-30**: Fix bugs and optimize code
-- **Day 31**: Prepare Dockerfile and dockerize the app
-- **Day 32**: Deploy backend and frontend servers
-- **Day 33**: Test deployment and resolve issues
+- `JWT_SECRET` must be at least 32 characters when `NODE_ENV=production`.
+- `CLIENT_URL` is required in production and supports comma-separated origins.
+- Keep all secrets out of Git and configure them in your hosting provider.
+- Use the existing MongoDB database name casing consistently. The local example uses `RaiseIt`.
 
-### Week 6: Feedback & Finalization (7 Days)
-- **Day 34-35**: Collect feedback from peers/mentors
-- **Day 36-37**: Implement feedback and polish UI
-- **Day 38-39**: Final feature polishing
-- **Day 40**: Record demo video and complete project documentation
+### Client `.env`
 
-### Buffer Days (5 Days)
-Reserved for unexpected bugs, deployment issues, or additional feature development.
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+```
 
----
+For production, set `VITE_API_BASE_URL` to the deployed backend API URL, for example:
 
-## Future Enhancements
-- Introduce AI-based suggestion system for discussionsn
-- Gamify engagement with badges and levels
-- Integration with government/public APIs for issue tracking
+```env
+VITE_API_BASE_URL=https://api.example.com/api
+```
 
----
+## Local Development
 
-## Contributors
+Install backend dependencies:
 
-**Gourish Chouhan** — Lead Developer and Architect  
+```bash
+cd server
+npm install
+```
 
-Contributions are welcome! Feel free to submit a PR or open an issue.   
+Install frontend dependencies:
 
----
+```bash
+cd client
+npm install
+```
 
-## Contact
+Start the backend:
 
-For collaborations, feedback, or questions, reach out via GitHub Issues or email at [gourishchouhan338@gmail.com].
+```bash
+cd server
+npm start
+```
 
-## Links
+Start the frontend:
 
-*   **Frontend Repository:** [Raise It! Frontend](https://raiseit-phi.vercel.app)
-*   **Backend Repository:** [Raise It! Backend](https://raiseit.onrender.com)
+```bash
+cd client
+npm run dev
+```
 
-**Happy Collaborating with Raise It! 🚀**
+Default local URLs:
 
----
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5000/api`
+- Backend health endpoint: `http://localhost:5000/`
 
+## Admin Access
+
+Admin access is granted at login time using the `ADMIN_EMAILS` environment variable.
+
+1. Add the admin email to `server/.env`:
+
+```env
+ADMIN_EMAILS=admin@example.com
+```
+
+2. Restart the backend.
+3. Log out and log back in with that email.
+4. Open `/admin` in the frontend.
+
+The admin dashboard supports:
+
+- Reviewing reported content
+- Hiding, restoring, or deleting reported concerns, groups, and discussions
+- Creating, editing, activating, deactivating, and deleting donation causes
+
+## Main Routes
+
+| Route | Description |
+| --- | --- |
+| `/` | Landing page |
+| `/auth` | Login and registration |
+| `/concerns` | Browse concerns |
+| `/concerns/new` | Create a concern |
+| `/concerns/:id` | Concern details |
+| `/community` | Browse groups |
+| `/community/new` | Create a group |
+| `/community/:id` | Group details and discussions |
+| `/community/:id/discussions/:discussionId` | Discussion details |
+| `/profile/:id` | User profile |
+| `/profile/:id/edit` | Edit profile |
+| `/donate` | Donation causes |
+| `/donate/result` | Payment result |
+| `/admin` | Admin dashboard |
+
+## API Overview
+
+| Prefix | Purpose |
+| --- | --- |
+| `/api/auth` | Register, login, Google OAuth |
+| `/api/users` | Profiles, user concerns, groups, donations |
+| `/api/concerns` | Concern CRUD, upvotes, comments, reports |
+| `/api/groups` | Groups, discussions, replies, reports |
+| `/api/causes` | Public active donation causes |
+| `/api/payments` | Razorpay order creation, verification, donation history |
+| `/api/upload` | Cloudinary image upload |
+| `/api/gemini` | Chatbot responses |
+| `/api/admin` | Admin summary, moderation, cause management |
+
+## Testing And Verification
+
+Run backend tests:
+
+```bash
+cd server
+npm test
+```
+
+Check frontend linting:
+
+```bash
+cd client
+npm run lint
+```
+
+Build frontend production assets:
+
+```bash
+cd client
+npm run build
+```
+
+Audit production dependencies:
+
+```bash
+cd server
+npm audit --audit-level=high --omit=dev
+
+cd ../client
+npm audit --audit-level=high --omit=dev
+```
+
+The current build may warn about large client chunks. The build still succeeds. For better production performance, add route-level lazy loading or manual chunking for heavy landing-page assets.
+
+## Deployment Checklist
+
+Before deploying:
+
+- Set `NODE_ENV=production` on the backend.
+- Use a long random `JWT_SECRET` with at least 32 characters.
+- Set production `CLIENT_URL` to the frontend origin. Use comma-separated origins only when needed.
+- Set `VITE_API_BASE_URL` to the deployed backend `/api` URL.
+- Configure MongoDB Atlas or another production MongoDB instance.
+- Configure Cloudinary credentials.
+- Configure Razorpay keys and verify test/live mode intentionally.
+- Configure Google OAuth callback URL to match the deployed backend.
+- Configure Gemini API key or accept fallback chatbot behavior.
+- Set `ADMIN_EMAILS` for initial admin users.
+- Add donation causes from the admin dashboard after deployment.
+- Run backend tests, frontend lint, frontend build, and production dependency audits.
+
+## Security Notes
+
+- Passwords are hashed with bcrypt before storage.
+- Authenticated APIs use JWT bearer tokens.
+- Admin APIs require both authentication and admin role checks.
+- Public CORS access is restricted to configured client origins.
+- Helmet is enabled for common HTTP security headers.
+- API, auth, and upload endpoints are rate-limited.
+- Uploads are sent to Cloudinary using memory storage rather than local disk persistence.
+- Payment verification uses Razorpay signature validation before marking donations as verified.
+
+## Operational Notes
+
+- If profile routes return `Route not found` locally, make sure the running backend process is the current codebase and restart the server.
+- If Gemini returns quota errors, the app falls back to built-in responses.
+- If donations fail immediately, verify both client and server Razorpay keys are configured.
+- If uploads fail, verify all three Cloudinary variables are configured.
+- If admin pages redirect home, confirm `ADMIN_EMAILS`, restart the backend, then log out and log back in.
+
+## License
+
+This project currently uses the license configured in `server/package.json`.
+
+## Maintainer
+
+RaiseIt is maintained as a full-stack community issue and donation platform. Use GitHub Issues for bugs, improvements, and deployment questions.

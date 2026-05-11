@@ -1,12 +1,22 @@
 import { useState } from "react";
-import { createConcern } from "../../services/api";
+import { createConcern, uploadImage } from "../../services/api";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 export default function CreateConcernForm({ onCreated }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [user, setUser] = useState("");
+  const [tags, setTags] = useState("");
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("");
+
+  const handleImageChange = (file) => {
+    setImage(file || null);
+    setPreview(file ? URL.createObjectURL(file) : "");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,12 +27,12 @@ export default function CreateConcernForm({ onCreated }) {
         const uploadRes = await uploadImage(image);
         imageUrl = uploadRes.url;
       }
-      await createConcern({ title, description, user, image: imageUrl });
+      await createConcern({ title, description, tags, image: imageUrl });
       setTitle("");
       setDescription("");
-      setUser("");
-      setImage(null);
-      onCreated();
+      setTags("");
+      handleImageChange(null);
+      onCreated?.();
     } catch (e) {
       alert(e.message);
     } finally {
@@ -31,41 +41,25 @@ export default function CreateConcernForm({ onCreated }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 p-4 border rounded">
-      <input
-        className="border p-2 w-full"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
-      <textarea
-        className="border p-2 w-full"
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        required
-      />
-      <input
-        className="border p-2 w-full"
-        placeholder="User ID"
-        value={user}
-        onChange={(e) => setUser(e.target.value)}
-        required
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setImage(e.target.files[0])}
-        className="block"
-      />
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-        disabled={loading}
-      >
-        {loading ? "Creating..." : "Create Concern"}
-      </button>
+    <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border bg-white p-6">
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required className="min-h-32" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="tags">Tags</Label>
+        <Input id="tags" placeholder="Infrastructure, Safety" value={tags} onChange={(e) => setTags(e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="image">Image</Label>
+        <Input id="image" type="file" accept="image/*" onChange={(e) => handleImageChange(e.target.files?.[0])} />
+        {preview && <img src={preview} alt="Preview" className="mt-3 max-h-64 rounded-lg border object-cover" />}
+      </div>
+      <Button type="submit" disabled={loading}>{loading ? "Creating..." : "Create Concern"}</Button>
     </form>
   );
 }
